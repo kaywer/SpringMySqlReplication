@@ -32,13 +32,11 @@ public class GeekArmsDataSource extends AbstractRoutingDataSource{
     @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
-        // 由于父类的resolvedDataSources属性是私有的子类获取不到，需要使用反射获取
         Field field = ReflectionUtils.findField(AbstractRoutingDataSource.class, "resolvedDataSources");
-        field.setAccessible(true); // 设置可访问
+        field.setAccessible(true);
 
         try {
             Map<Object, DataSource> resolvedDataSources = (Map<Object, DataSource>) field.get(this);
-            // 读库的数据量等于数据源总数减去写库的数量
             this.slaveCount = resolvedDataSources.size() - 1;
             for (Map.Entry<Object, DataSource> entry : resolvedDataSources.entrySet()) {
                 if (DataSourceHolder.MASTER.equals(entry.getKey())) {
@@ -53,8 +51,8 @@ public class GeekArmsDataSource extends AbstractRoutingDataSource{
 
     private Object getSlaveKey(){
         Integer index = counter.incrementAndGet() % slaveCount;
-        if (counter.get() > 9999) { // 以免超出Integer范围
-            counter.set(-1); // 还原
+        if (counter.get() > 9999) {
+            counter.set(-1);
         }
         return slaveKeys.get(index);
     }
